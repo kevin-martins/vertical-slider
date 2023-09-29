@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import SliderButton from "@/components/SliderButton";
 import Slider from "@/components/Slider";
-import { pages } from "@/components/Pages";
+import pages from "@/components/Pages";
 
 const Home = () => {
   return (
