@@ -1,24 +1,27 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
 import SliderButton from './SliderButton'
+import { BubblesProps } from '@/models/bubbles'
 
-type Props = {
-  pages: JSX.Element[]
-  hasIndex?: boolean
+type SliderProps = {
+  firstPage?: JSX.Element
+  data: JSX.Element[]
+  scrollDelay: number
+  bubbles?: BubblesProps
 }
 
-const Slider = ({ pages, hasIndex = true }: Props) => {
-  const [index, setIndex] = useState<number>(0)
+const Slider = ({ data, scrollDelay, bubbles }: SliderProps) => {
+  const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [isScrollable, setIsScrollable] = useState<boolean>(true)
-  const [currentPage, setCurrentPage] = useState<JSX.Element>()
+  const [currentPage, setCurrentPage] = useState<JSX.Element>(<></>)
 
   const handleIndex = (i: number) => {
-    setIndex(i)
+    setCurrentIndex(i)
   }
   
   useEffect(() => {
-    setCurrentPage(pages[index])
-  }, [index])
+    setCurrentPage(data[currentIndex])
+  }, [currentIndex, data])
 
   useEffect(() => {
     const handleWheel = (event: any) => {
@@ -29,22 +32,16 @@ const Slider = ({ pages, hasIndex = true }: Props) => {
         setIsScrollable(false);
         if (scrollDelta > 0) {
           // User is scrolling down
-          console.log('down', index)
-          if (index >= 0) {
-            setIndex(prev => Math.max(0, prev - 1))
+          if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1)
           }
         } else {
           // User is scrolling up
-          console.log('up', index)
-          if (index < pages.length) {
-            setIndex(prev => Math.min(pages.length - 1, prev + 1)) // 0 à 4 inclus
+          if (currentIndex < data.length - 1) {
+            setCurrentIndex(prev => prev + 1)
           }
         }
       }
-
-      setTimeout(() => {
-        setIsScrollable(true);
-      }, 2000);
     };
 
     window.addEventListener('wheel', handleWheel);
@@ -52,27 +49,33 @@ const Slider = ({ pages, hasIndex = true }: Props) => {
     return () => {
       window.removeEventListener('wheel', handleWheel);
     };
-  }, []);
+  }, [currentIndex, isScrollable, data]);
 
   useEffect(() => {
     setTimeout(() => {
       setIsScrollable(true);
-    }, 2000);
-  }, [isScrollable]);
+    }, scrollDelay);
+  }, [isScrollable, scrollDelay]);
 
   return (
     <div className='w-full h-screen'>
-      {index}
-      {isScrollable}
       {currentPage}
-      {<div className="flex flex-col gap-[5px] fixed right-2 top-1/2 -translate-y-1/2">
-        {pages.map((_, i: number) =>
+      {bubbles && <div className="flex flex-col gap-[5px] fixed right-2 top-1/2 -translate-y-1/2">
+        {data.map((_, index: number) =>
           <div
-            key={i}
+            key={index}
             className="flex ml-auto"
-            onClick={() => handleIndex(i)}
+            onClick={() => handleIndex(index)}
           >
-            <SliderButton index={i} />
+            <SliderButton
+              {
+                ...{
+                  currentIndex,
+                  index,
+                  ...bubbles,
+                }
+              }
+            />
           </div>
         )}
       </div>}

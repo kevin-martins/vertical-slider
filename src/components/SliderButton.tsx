@@ -1,11 +1,13 @@
 'use client'
+import { BubblesProps } from "@/models/bubbles"
 import { useState } from "react"
 
 type Props = {
   index: number
+  currentIndex: number
 }
 
-const SliderButton = ({ index }: Props) => {
+const SliderButton = (props: Props & BubblesProps) => {
   const [hover, setHover] = useState<boolean>(false)
 
   const handleEnter = () => {
@@ -16,15 +18,43 @@ const SliderButton = ({ index }: Props) => {
     setHover(false)
   }
 
+  const bubbleStyleBackgroundColor = () => {
+    if (props.currentIndex === props.index) {
+      return props.color?.current
+    } else if (hover) {
+      return props.color?.hover
+    }
+    return props.color?.default
+  }
+
+  const bubbleScaleSize = () => {
+    if (props.currentIndex === props.index) {
+      return props.size?.current
+    } else if (hover) {
+      return props.size?.hover
+    }
+    return 1
+  }
+
   return (
     <>
       <span
-        className={`opacity-80 text-2xl text-white mr-2 ${!hover ? 'hidden' : ''}`}
+        className={`text-2xl mr-2 ${!hover ? 'hidden' : ''}`}
+        style={{ color: props.text?.color }}
       >
-        Page {index + 1}
+        {`${props.text?.value.replace(/%i/g, () => `${props.index + 1}` )}`}
       </span>
       <button
-        className={`rounded-full bg-white/70 mr-auto my-auto w-3 h-3 border-[.5px] ${hover ? 'border-white' : 'border-black/10'}`}
+        className={`rounded-full mr-auto my-auto mr-1`}
+        // ${props.currentIndex === props.index && `scale-125 `}
+        style={
+          {
+            backgroundColor: bubbleStyleBackgroundColor(),
+            width: props.size?.default,
+            height: props.size?.default,
+            transform: `scale(${bubbleScaleSize()})`
+          }
+        }
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
       />
